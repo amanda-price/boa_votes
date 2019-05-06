@@ -59,7 +59,6 @@ def getVotes(bbid):
 				noVoteFlag = False
 
 
-bblist = []
 
 ## These are the years shown currently. Once the 19/20 session starts, this could be replaced just to parse that 
 ## new session.
@@ -67,7 +66,7 @@ years = ["2018-2019","2017-2018","2016-2017","2015-2016"]
 
 
 for year in years:
-
+	bblist = []
 	## Separating the BOA votes into files by session
 	vote_file = open("boa_votes_"+year[2:4]+year[-2:]+".csv",'w')
 	## bbid is the Board Bill number
@@ -86,3 +85,5 @@ for year in years:
 
 	for bbid in bblist:
 		getVotes(bbid)
+		
+	vote_file.close()

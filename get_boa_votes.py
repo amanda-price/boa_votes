@@ -42,7 +42,8 @@ def getVotes(bbid):
 							voteType = "No"
 						if description == "":
 							print("Description not saved")
-						vote_file.write("{},{},{},{},{}\n".format(year,bb,ward,alderperson,voteType))
+						unique_id = year+"-"+bb
+						vote_file.write("{},{},{},{},{},{}\n".format(unique_id,year,bb,ward,alderperson,voteType))
 						
 					count = count -1
 
@@ -80,13 +81,13 @@ def getVotes(bbid):
 			sponsorFlag = True
 	print(year,bb,description)
 
-	bb_file.write("{},{},{},{},{},{}\n".format(year,bb,sponsor,date,description,url))
+	bb_file.write("{},{},{},{},{},{},{}\n".format(unique_id,year,bb,sponsor,date,description,url))
 
 
 
 ## These are the years shown currently. Once the 19/20 session starts, this could be replaced just to parse that 
 ## new session.
-years = ["2016-2017","2015-2016"]
+years = ["2018-2019","2017-2018","2016-2017","2015-2016"]
 
 
 for year in years:
@@ -95,8 +96,8 @@ for year in years:
 	vote_file = open("boa_votes_"+year[2:4]+year[-2:]+".csv",'w')
 	bb_file = open("boa_bb_"+year[2:4]+year[-2:]+".csv",'w')
 	## bbid is the Board Bill number
-	vote_file.write("session,bbid,ward,alderperson,vote\n")
-	bb_file.write("session,bbid,sponsor,date of vote, title, url\n")
+	vote_file.write("unique_id,session,bbid,ward,alderperson,vote\n")
+	bb_file.write("unique_id,session,bbid,sponsor,date of vote, title, url\n")
 
 	url = "https://www.stlouis-mo.gov/government/city-laws/board-bills/votes/index.cfm?session="+year+"&submit=Choose+Session"
 	response = urllib.request.urlopen(url)

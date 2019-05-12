@@ -14,10 +14,12 @@ def getVotes(bbid):
 	voteTypes = ("Ayes","Noes","Did Not Vote","Abstain","Present","Absent","Vacant Seat")
 
 	for line in text:
+		if line.startswith(year+" Board bill"):
+			row = line.split("--")
+			description = row[1].strip().replace(",","")
 		if line.startswith("Board Bill No."):
 			row = line.split()
 			bb = row[3]
-			print(year,bb)
 		if line.startswith("Your feedback was not sent"):
 			writeOnFlag =False
 		if "/20" in line:
@@ -38,7 +40,10 @@ def getVotes(bbid):
 							voteType = "Aye"
 						if voteType == "Noes":
 							voteType = "No"
-						vote_file.write("{},{},{},{},{}\n".format(bb,date,ward,alderperson,voteType))
+						if description == "":
+							print("Description not saved")
+						vote_file.write("{},{},{},{},{}\n".format(year,bb,ward,alderperson,voteType))
+						
 					count = count -1
 
 		if line.startswith(voteTypes):
@@ -57,20 +62,41 @@ def getVotes(bbid):
 				## a better way to do this, but it works.
 				count = numberOfVotes*2
 				noVoteFlag = False
+	id_num = bbid.split("=")
+	url2 = "https://www.stlouis-mo.gov/government/city-laws/board-bills/boardbill.cfm?bbDetail=true&BBId="+id_num[1]
+	try:
+		response = urllib.request.urlopen(url2)
+	except:
+		print(url2)
+	soup = BeautifulSoup(response.read(), 'html.parser')
+	text = soup.get_text().splitlines()
+	sponsorFlag = False
+	sponsor = "n/a"
+	for line in text:
+		if sponsorFlag:
+			sponsor = line.strip()
+			sponsorFlag = False
+		if line.startswith("Sponsor:"):
+			sponsorFlag = True
+	print(year,bb,description)
+
+	bb_file.write("{},{},{},{},{},{}\n".format(year,bb,sponsor,date,description,url))
 
 
 
 ## These are the years shown currently. Once the 19/20 session starts, this could be replaced just to parse that 
 ## new session.
-years = ["2018-2019","2017-2018","2016-2017","2015-2016"]
+years = ["2016-2017","2015-2016"]
 
 
 for year in years:
 	bblist = []
 	## Separating the BOA votes into files by session
 	vote_file = open("boa_votes_"+year[2:4]+year[-2:]+".csv",'w')
+	bb_file = open("boa_bb_"+year[2:4]+year[-2:]+".csv",'w')
 	## bbid is the Board Bill number
-	vote_file.write("bbid,date of vote,ward,alderperson,vote\n")
+	vote_file.write("session,bbid,ward,alderperson,vote\n")
+	bb_file.write("session,bbid,sponsor,date of vote, title, url\n")
 
 	url = "https://www.stlouis-mo.gov/government/city-laws/board-bills/votes/index.cfm?session="+year+"&submit=Choose+Session"
 	response = urllib.request.urlopen(url)
